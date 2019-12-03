@@ -1,0 +1,91 @@
+<mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+
+  <mat-tree-node *matTreeNodeDef="let node"
+                 matTreeNodePadding>
+    <div id="{{'l'+node.item.key}}">
+      <svg height="25" width="25">
+        <circle cx="50%" cy="50%" r="3.5" fill="#fff" stroke="#888" stroke-width="1.2"
+                data-test-id="circ"></circle>
+      </svg>
+    </div>
+
+    <button mat-icon-button disabled></button>
+    <div class="checklist-leaf-node"
+         [ngClass]="{'drop-above': dragNodeExpandOverArea === 'above' && dragNodeExpandOverNode === node,
+                                'drop-below': dragNodeExpandOverArea === 'below' && dragNodeExpandOverNode === node,
+                                'drop-center': dragNodeExpandOverArea === 'center' && dragNodeExpandOverNode === node}"
+         (change)="checklistSelection.toggle(node);"
+         draggable="true"
+         (dragstart)="handleDragStart($event, node);"
+         (dragover)="handleDragOver($event, node);"
+         (drop)="handleDrop($event, node)"
+         (dragend)="handleDragEnd($event);"><label class="control-label">{{node.item.key}}</label>
+    </div>
+
+    <!--<div class="dropdown pad-LR10">
+      <a data-toggle="dropdown" *ngIf="editable"><i class="fa fa-ellipsis-h"></i> </a>
+      <ul class="dropdown-menu">
+        <li><a (click)="addNewItem(node)">Add</a></li>
+        <li><a (click)="deleteItem(node)">Remove</a></li>
+        &lt;!&ndash;<li><a (click)="copyNode(node)">Copy</a></li>
+        <li><a *ngIf="copiedNode" (click)="pasteNode(node)">Paste</a></li>&ndash;&gt;
+      </ul>
+    </div>-->
+    <div id="{{'r'+node.item.key}}">
+      <svg height="25" width="25">
+        <circle cx="50%" cy="50%" r="3.5" fill="#fff" stroke="#888" stroke-width="1.2"
+                data-test-id="circ"></circle>
+      </svg>
+    </div>
+  </mat-tree-node>
+
+  <mat-tree-node *matTreeNodeDef="let node; when: hasNoContent" matTreeNodePadding>
+    <button mat-icon-button disabled></button>
+    <mat-form-field>
+      <input matInput #itemValue placeholder="New item...">
+    </mat-form-field>
+    <button mat-button (click)="saveNode(node, itemValue.value)">Save</button>
+  </mat-tree-node>
+
+  <mat-tree-node *matTreeNodeDef="let node; when: hasChild"
+                 matTreeNodePadding>
+    <div id="{{'l'+node.item.key}}">
+      <svg height="25" width="25">
+        <circle cx="50%" cy="50%" r="3.5" fill="#fff" stroke="#888" stroke-width="1.2"
+                data-test-id="circ"></circle>
+      </svg>
+    </div>
+    <button mat-icon-button matTreeNodeToggle
+            [attr.aria-label]="'toggle ' + node.filename">
+      <mat-icon class="mat-icon-rtl-mirror">
+        {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+      </mat-icon>
+    </button>
+    <mat-label [ngClass]="{'drop-above': dragNodeExpandOverArea === 'above' && dragNodeExpandOverNode === node,
+                              'drop-below': dragNodeExpandOverArea === 'below' && dragNodeExpandOverNode === node,
+                              'drop-center': dragNodeExpandOverArea === 'center' && dragNodeExpandOverNode === node}"
+               draggable="true"
+               (dragstart)="handleDragStart($event, node);"
+               (dragover)="handleDragOver($event, node);"
+               (drop)="handleDrop($event, node);"
+               (dragend)="handleDragEnd($event);"
+               (change)="todoItemSelectionToggle(node)"><label class="control-label">{{node.item.key}}</label>
+    </mat-label>
+
+    <!--<div class="dropdown pad-LR10">
+      <a data-toggle="dropdown"><em class="fa fa-ellipsis-h"></em> </a>
+      <ul class="dropdown-menu" aria-labelledby="dropdown">
+        <li><a (click)="addNewItem(node)">Add</a></li>
+        <li><a (click)="deleteItem(node)">Remove</a></li>
+      </ul>
+    </div>-->
+    <div id="{{'r'+node.item.key}}">
+      <svg height="20" width="20">
+        <circle cx="50%" cy="50%" r="3.5" fill="#fff" stroke="#888" stroke-width="1.2"
+                data-test-id="circ"></circle>
+      </svg>
+    </div>
+  </mat-tree-node>
+</mat-tree>
+<br/>
+<span #emptyItem></span>
