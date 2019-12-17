@@ -8,27 +8,28 @@ import {Component} from '@angular/core';
 })
 export class AppComponent {
 
-  constructor() {}
+  constructor() {
+  }
 
-  treeData = {
-    phones: [
-      {
-        type: {
-          code: 'HOME',
-          id: 'mPhoneTypes/9481',
-          title: 'Home'
-        },
-        phone: '@Current_Phone'
-      }
-    ],
-    emails: {
-
-      type: {
-        id: 'mEmailTypes/8972',
-        title: 'Personal'
-      },
-      email: '@CCC_EMAIL_ADDR',
-      isPrimary: false
-    }
+  data2 = {
+    firstName: 'a',
+    lastName: 'b',
+    postalAddress: {
+      country: 'APE',
+      city: 'jp',
+      street: '',
+    },
+    phone: '9989',
+    deliveryAddress: {
+      country: 'APE',
+      city: 'jp',
+      street: 'noida',
+    },
+    customerId: 'asd',
+    id: 'asd',
+    email: 'asd'
   };
+
+  data1 = {name: 'something', age: '12', address: {street: {line1: '', line2: ''}, building: 'sdf'}};
+
 }

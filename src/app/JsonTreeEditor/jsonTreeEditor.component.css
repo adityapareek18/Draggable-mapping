@@ -1,0 +1,50 @@
+.drop-above {
+  border-top: 10px solid #dddddd;
+  margin-top: -10px;
+}
+
+.drop-below {
+  border-bottom: 10px solid #dddddd;
+  margin-bottom: -10px;
+}
+
+.drop-center {
+  background-color: #dddddd;
+}
+
+:host /deep/ mat-tree-node {
+  min-height: 22px;
+}
+
+.anchor40 {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  position: absolute;
+  background-color: #9ee7ea;
+  box-sizing: border-box;
+  padding: 5px 0;
+  font-size: 24px;
+  line-height: 1;
+  text-align: center;
+}
+
+button:focus i {
+  animation: rotate 1s ease-in-out 0s;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+mat-tree-node:hover {
+  background: rgba(72,193,237,.4);
+  background: linear-gradient(90deg,#c5e3ef,transparent);
+  border-radius: 3px;
+  color: #0f4154;
+}
+
+.connector {
+  float: right;
+}

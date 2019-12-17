@@ -1,13 +1,44 @@
 <div class="container">
-  <div class="row" style="border-style: solid;border-width: 1px">
-    <div id="source" class="col-md-3" style="max-height: 80vh; overflow-y: auto;">
-      <app-json-tree [inputData]="data1"></app-json-tree>
+  <div class="row" id="wizard-container">
+    <div class="col-md-8 col-xs-8">
+      <div id="source" class="col-md-5 col-xs-5">
+        <app-json-tree-editor (restructureEvent)="connectLines()" [side]="'source'" [inputData]="data1"></app-json-tree-editor>
+      </div>
+      <!--<div id="dest" >-->
+      <div id="exTab1" class="col-md-7 col-xs-7">
+        <div class="tab-content clearfix">
+          <div class="tab-pane active" id="1a">
+            <div id="linekeeper" class="col-md-4 col-xs-4"></div>
+            <div class="col-md-8 col-xs-8" id="frame">
+              <app-json-tree-editor (restructureEvent)="connectLines()" [side]="'dest'" [inputData]="data2"
+                                    (dropEvent)="connectLine($event)"></app-json-tree-editor>
+            </div>
+          </div>
+          <div class="tab-pane" id="2a">
+            <div class="tabHeader">
+              Transformation script
+            </div>
+          </div>
+          <div class="tab-pane" id="3a">
+            <div class="tabHeader">
+              Sample data for payload (application/json)
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="tabs"><ul class="nav nav-tabs">
+        <li (click)="hideLines()">
+          <a href="#3a" data-toggle="tab">Sample Data</a>
+        </li>
+        <li (click)="hideLines()"><a href="#2a" data-toggle="tab">Script</a>
+        </li>
+        <li (click)="showLines()" class="active"><a href="#1a" data-toggle="tab">Mapping</a>
+        </li>
+      </ul></div>
     </div>
-    <div class="col-md-2" style="height: 80vh;border-left: 1px solid;border-right: 1px solid">
+    <div id="preview" class="col-md-4 col-xs-4">
+      <pre>{{preview | json}}</pre>
     </div>
-    <div id="dest" class="col-md-3" style="max-height: 80vh; overflow-y: auto;">
-      <app-json-tree [inputData]="data2" (dropEvent)="connectLine($event)"></app-json-tree>
-    </div>
-    <div class="col-md-4">Preview</div>
   </div>
 </div>

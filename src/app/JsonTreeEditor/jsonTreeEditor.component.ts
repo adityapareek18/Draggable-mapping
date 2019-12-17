@@ -3,7 +3,7 @@ import {FlatTreeControl} from '@angular/cdk/tree';
 import {Component, ElementRef, EventEmitter, Inject, Injectable, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {BehaviorSubject} from 'rxjs';
-
+import {trigger, state, style, transition, animate} from '@angular/animations';
 
 /**
  * Node for to-do item
@@ -249,16 +249,34 @@ export class ChecklistDatabase {
 }
 
 @Component({
-  selector: 'app-json-tree',
-  templateUrl: './jsonTree.component.html',
-  styleUrls: ['./jsonTree.component.css'],
-  providers: [ChecklistDatabase]
+  selector: 'app-json-tree-editor',
+  templateUrl: './jsonTreeEditor.component.html',
+  styleUrls: ['./jsonTreeEditor.component.css'],
+  providers: [ChecklistDatabase],
+  animations: [
+    trigger('openClose', [
+      state('closed', style({
+        transform: 'rotate(0deg)'
+      })),
+      state('open', style({
+        transform: 'rotate(90deg)'
+      })),
+      transition('open => closed', [
+        animate('.15s')
+      ]),
+      transition('closed => open', [
+        animate('.15s')
+      ]),
+    ]),
+  ]
 })
-export class JsonTreeComponent implements OnChanges {
+export class JsonTreeEditorComponent implements OnChanges {
   @Input() inputData: object = {};
   @Input() editable: boolean;
   @Input() sourceAttrs: string[];
   @Output() dropEvent = new EventEmitter();
+  @Output() restructureEvent = new EventEmitter();
+  @Input() side: string;
   /** Map from flat node to nested node. This helps us finding the nested node to be modified */
   flatNodeMap = new Map<TodoItemFlatNode, TodoItemNode>();
 
@@ -415,6 +433,7 @@ export class JsonTreeComponent implements OnChanges {
     event.dataTransfer.setData('foo', 'bar');
     event.dataTransfer.setData('flatMap', JSON.stringify(Array.from(this.flatNodeMap)));
     event.dataTransfer.setData('dragNode', JSON.stringify(node));
+    event.dataTransfer.setData('dragNodeId', this.getQualifiedId(node));
     event.dataTransfer.setDragImage(this.emptyItem.nativeElement, 0, 0);
     this.dragNode = node;
     this.treeControl.collapse(node);
@@ -463,18 +482,10 @@ export class JsonTreeComponent implements OnChanges {
     } else {
       const flatMap = this.prepareFlatMap(event.dataTransfer.getData('flatMap'));
       const extDragNode = this.toTodoItemFlatNode(JSON.parse(event.dataTransfer.getData('dragNode')));
+      const extDragNodeId = event.dataTransfer.getData('dragNodeId');
       let newItem: TodoItemNode;
-      if (this.dragNodeExpandOverArea === 'above') {
-        // newItem = this.database.copyPasteItemAbove(this.findFromFlatMap(flatMap, extDragNode), this.flatNodeMap.get(node));
-      } else if (this.dragNodeExpandOverArea === 'below') {
-        // newItem = this.database.copyPasteItemBelow(this.findFromFlatMap(flatMap, extDragNode), this.flatNodeMap.get(node));
-      } else {
-        newItem = this.database.copyPasteValue(this.findFromFlatMap(flatMap, extDragNode), this.flatNodeMap.get(node));
-        this.dropEvent.emit('r' + this.findFromFlatMap(flatMap, extDragNode).item.key + '|' + 'l' +
-          this.flatNodeMap.get(node).item.key);
-      }
-      // this.database.deleteItem(this.flatNodeMap.get(this.dragNode));
-      // this.treeControl.expandDescendants(this.nestedNodeMap.get(newItem));
+      newItem = this.database.copyPasteValue(this.findFromFlatMap(flatMap, extDragNode), this.flatNodeMap.get(node));
+      this.dropEvent.emit('s' + extDragNodeId + '|' + 'd' + this.getQualifiedId(node));
     }
     this.dragNode = null;
     this.dragNodeExpandOverNode = null;
@@ -606,4 +617,19 @@ export class JsonTreeComponent implements OnChanges {
     node.selectConcatField = !node.selectConcatField;
   }
 
+  repositionLines() {
+    this.restructureEvent.emit();
+  }
+
+  getQualifiedId(node) {
+    // return node.item.key;
+    return this.getParent(node) != null ? this.getQualifiedId(this.getParent(node)) + '_' + node.item.key : node.item.key;
+  }
+
+  getConnectorId(side, node) {
+    return side === 'source' ? 's' + this.getQualifiedId(node) : 'd' + this.getQualifiedId(node);
+  }
 }
+
+
+

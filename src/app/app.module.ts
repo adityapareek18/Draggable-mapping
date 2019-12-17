@@ -5,14 +5,16 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 
 import { MatButtonModule, MatCheckboxModule, MatFormFieldModule, MatIconModule, MatInputModule, MatTreeModule } from '@angular/material';
-import {JsonTreeComponent} from './JsonTree/jsonTree.component';
+import {JsonTreeEditorComponent} from './JsonTreeEditor/jsonTreeEditor.component';
 import {AdvanceMappingWizComponent} from './AdvanceMapping/advancemappingwiz.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
-    AppComponent, JsonTreeComponent, AdvanceMappingWizComponent
+    AppComponent, JsonTreeEditorComponent, AdvanceMappingWizComponent
   ],
   imports: [
+    FormsModule,
     BrowserModule,
     BrowserAnimationsModule,
     MatButtonModule,

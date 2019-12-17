@@ -30,7 +30,7 @@
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
               "node_modules/bootstrap/dist/js/bootstrap.min.js",
-              "leader-line.min.js",
+              "node_modules/leader-line/leader-line.min.js",
               "node_modules/anim-event/anim-event.min.js"
             ]
           },
