@@ -1,12 +1,8 @@
-# DraggableMatTree
-
-![](http://www.alessiorubis.it/angular-draggable-mat-tree-v2.gif)
-
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.0.8.
+# DraggableMatTreeMapping witj Leader Lines
 
 ## Working demo
 
-https://stackblitz.com/edit/angular-draggable-mat-tree
+https://angular-khfrwr.stackblitz.io
 
 ## Installation
 
