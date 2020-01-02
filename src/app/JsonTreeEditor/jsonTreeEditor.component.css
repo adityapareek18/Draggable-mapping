@@ -47,4 +47,5 @@ mat-tree-node:hover {
 
 .connector {
   float: right;
+  position: relative;
 }

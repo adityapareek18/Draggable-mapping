@@ -1,13 +1,10 @@
 import {SelectionModel} from '@angular/cdk/collections';
 import {FlatTreeControl} from '@angular/cdk/tree';
-import {Component, ElementRef, EventEmitter, Inject, Injectable, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Injectable, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {BehaviorSubject} from 'rxjs';
-import {trigger, state, style, transition, animate} from '@angular/animations';
+import {animate, state, style, transition, trigger} from '@angular/animations';
 
-/**
- * Node for to-do item
- */
 export class TodoItem {
   key: string;
   value: string;
@@ -272,11 +269,12 @@ export class ChecklistDatabase {
 })
 export class JsonTreeEditorComponent implements OnChanges {
   @Input() inputData: object = {};
-  @Input() editable: boolean;
   @Input() sourceAttrs: string[];
+  @Input() dragData: Map<string, string>;
+  @Input() side: string;
+  @Output() dragEvent = new EventEmitter();
   @Output() dropEvent = new EventEmitter();
   @Output() restructureEvent = new EventEmitter();
-  @Input() side: string;
   /** Map from flat node to nested node. This helps us finding the nested node to be modified */
   flatNodeMap = new Map<TodoItemFlatNode, TodoItemNode>();
 
@@ -317,17 +315,19 @@ export class JsonTreeEditorComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    let inputObj = null;
-    const intmdObj = JSON.parse(JSON.stringify(this.inputData));
-    if (Array.isArray(intmdObj)) {
-      inputObj = {};
-      this.showAsLabels = true;
-      intmdObj.forEach(e => {
-        inputObj[e] = null;
-      });
-      inputObj = JSON.stringify(inputObj);
+    if (!(Object.keys(changes).length === 1 && Object.keys(changes)[0] === 'dragData')) {
+      let inputObj = null;
+      const intmdObj = JSON.parse(JSON.stringify(this.inputData));
+      if (Array.isArray(intmdObj)) {
+        inputObj = {};
+        this.showAsLabels = true;
+        intmdObj.forEach(e => {
+          inputObj[e] = null;
+        });
+        inputObj = JSON.stringify(inputObj);
+      }
+      this.database.prepareTree(intmdObj);
     }
-    this.database.prepareTree(intmdObj);
   }
 
   getLevel = (node: TodoItemFlatNode) => node.level;
@@ -429,14 +429,13 @@ export class JsonTreeEditorComponent implements OnChanges {
   }
 
   handleDragStart(event, node) {
-    // Required by Firefox (https://stackoverflow.com/questions/19055264/why-doesnt-html5-drag-and-drop-work-in-firefox)
-    event.dataTransfer.setData('foo', 'bar');
-    event.dataTransfer.setData('flatMap', JSON.stringify(Array.from(this.flatNodeMap)));
-    event.dataTransfer.setData('dragNode', JSON.stringify(node));
-    event.dataTransfer.setData('dragNodeId', this.getQualifiedId(node));
-    event.dataTransfer.setDragImage(this.emptyItem.nativeElement, 0, 0);
-    this.dragNode = node;
-    this.treeControl.collapse(node);
+    const map = new Map<string, string>();
+    map.set('flatMap', JSON.stringify(Array.from(this.flatNodeMap)));
+    map.set('dragNode', JSON.stringify(node));
+    map.set('dragNodeId', this.getQualifiedId(node));
+    // this.dragNode = node;
+    // this.treeControl.collapse(node);
+    this.dragEvent.emit(map);
   }
 
   handleDragOver(event, node) {
@@ -468,28 +467,18 @@ export class JsonTreeEditorComponent implements OnChanges {
 
   handleDrop(event, node) {
     event.preventDefault();
-    if (this.dragNode && node !== this.dragNode) {
-      let newItem: TodoItemNode;
-      if (this.dragNodeExpandOverArea === 'above') {
-        newItem = this.database.copyPasteItemAbove(this.flatNodeMap.get(this.dragNode), this.flatNodeMap.get(node));
-      } else if (this.dragNodeExpandOverArea === 'below') {
-        newItem = this.database.copyPasteItemBelow(this.flatNodeMap.get(this.dragNode), this.flatNodeMap.get(node));
-      } else {
-        newItem = this.database.copyPasteItem(this.flatNodeMap.get(this.dragNode), this.flatNodeMap.get(node));
-      }
-      this.database.deleteItem(this.flatNodeMap.get(this.dragNode));
-      this.treeControl.expandDescendants(this.nestedNodeMap.get(newItem));
-    } else {
-      const flatMap = this.prepareFlatMap(event.dataTransfer.getData('flatMap'));
-      const extDragNode = this.toTodoItemFlatNode(JSON.parse(event.dataTransfer.getData('dragNode')));
-      const extDragNodeId = event.dataTransfer.getData('dragNodeId');
+    if (this.dragData) {
+      const flatMap = this.prepareFlatMap(this.dragData.get('flatMap'));
+      const extDragNode = this.toTodoItemFlatNode(JSON.parse(this.dragData.get('dragNode')));
+      const extDragNodeId = this.dragData.get('dragNodeId');
       let newItem: TodoItemNode;
       newItem = this.database.copyPasteValue(this.findFromFlatMap(flatMap, extDragNode), this.flatNodeMap.get(node));
       this.dropEvent.emit('s' + extDragNodeId + '|' + 'd' + this.getQualifiedId(node));
+
+      this.dragNode = null;
+      this.dragNodeExpandOverNode = null;
+      this.dragNodeExpandOverTime = 0;
     }
-    this.dragNode = null;
-    this.dragNodeExpandOverNode = null;
-    this.dragNodeExpandOverTime = 0;
   }
 
   findFromFlatMap(map: Map<TodoItemFlatNode, TodoItemNode>, node: TodoItemFlatNode): TodoItemNode {
@@ -622,8 +611,7 @@ export class JsonTreeEditorComponent implements OnChanges {
   }
 
   getQualifiedId(node) {
-    // return node.item.key;
-    return this.getParent(node) != null ? this.getQualifiedId(this.getParent(node)) + '_' + node.item.key : node.item.key;
+    return this.getParent(node) != null ? this.getQualifiedId(this.getParent(node)) + '__' + node.item.key : node.item.key;
   }
 
   getConnectorId(side, node) {
