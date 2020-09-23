@@ -4,6 +4,9 @@
 
 https://angular-khfrwr.stackblitz.io
 
+Some issue is there with the stackblitz demo, like a child connected child node will show dotted line if its parent is collapsed. And the lines should move with scroll
+which is also not working in stackblitz. I recommend to the download the ZIP and serve using Angular CLI to see it in full action.
+
 ## Installation
 
 Run `npm install`.
